@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze News - CrediNews{% endblock %}
+
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/analyze.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="analyze-container">
+    <!-- Header Section -->
+    <section class="analyze-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-search"></i>
+                News Credibility Analysis
+            </h1>
+            <p class="page-description">
+                Paste a news article, URL, or Facebook post to analyze its credibility using our AI-powered system.
+            </p>
+        </div>
+    </section>
+
+    <!-- Analysis Form -->
+    <section class="analysis-form-section">
+        <div class="form-container">
+            <form id="analysisForm" class="analysis-form">
+                <!-- Input Type Selector -->
+                <div class="input-type-selector">
+                    <div class="selector-header">
+                        <h3>Choose Input Type</h3>
+                        <p>Select how you want to provide the news content</p>
+                    </div>
+                    <div class="type-options">
+                        <label class="type-option active" data-type="text">
+                            <input type="radio" name="input_type" value="text" checked>
+                            <div class="option-content">
+                                <i class="fas fa-file-text"></i>
+                                <span class="option-title">Text/Article</span>
+                                <span class="option-desc">Paste news content directly</span>
+                            </div>
+                        </label>
+                        <label class="type-option" data-type="url">
+                            <input type="radio" name="input_type" value="url">
+                            <div class="option-content">
+                                <i class="fas fa-link"></i>
+                                <span class="option-title">URL</span>
+                                <span class="option-desc">Analyze from web link</span>
+                            </div>
+                        </label>
+                        <label class="type-option" data-type="facebook">
+                            <input type="radio" name="input_type" value="facebook">
+                            <div class="option-content">
+                                <i class="fab fa-facebook"></i>
+                                <span class="option-title">Facebook Post</span>
+                                <span class="option-desc">Analyze Facebook content</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Input Fields -->
+                <div class="input-section">
+                    <!-- Text Input -->
+                    <div class="input-group" id="textInput">
+                        <label for="newsText" class="input-label">
+                            <i class="fas fa-file-text"></i>
+                            News Content
+                        </label>
+                        <textarea 
+                            id="newsText" 
+                            name="content" 
+                            class="form-textarea"
+                            placeholder="Paste your news article, headline, or any text content here..."
+                            rows="8"
+                        ></textarea>
+                        <div class="input-help">
+                            <span class="char-counter">0 characters</span>
+                            <span class="help-text">Minimum 50 characters required</span>
+                        </div>
+                    </div>
+
+                    <!-- URL Input -->
+                    <div class="input-group hidden" id="urlInput">
+                        <label for="newsUrl" class="input-label">
+                            <i class="fas fa-link"></i>
+                            News URL
+                        </label>
+                        <input 
+                            type="url" 
+                            id="newsUrl" 
+                            name="url" 
+                            class="form-input"
+                            placeholder="https://example.com/news-article"
+                        >
+                        <div class="input-help">
+                            <span class="help-text">Enter a valid URL to a news article or webpage</span>
+                        </div>
+                    </div>
+
+                    <!-- Facebook Input -->
+                    <div class="input-group hidden" id="facebookInput">
+                        <label for="facebookUrl" class="input-label">
+                            <i class="fab fa-facebook"></i>
+                            Facebook Post URL
+                        </label>
+                        <input 
+                            type="url" 
+                            id="facebookUrl" 
+                            name="facebook_url" 
+                            class="form-input"
+                            placeholder="https://facebook.com/post/123456789"
+                        >
+                        <div class="input-help">
+                            <span class="help-text">Enter a Facebook post URL for analysis with poser detection</span>
+                        </div>
+                        <div class="facebook-options">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="include_poser_detection" checked>
+                                <span class="checkmark"></span>
+                                Include poser detection analysis
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="analyze_comments">
+                                <span class="checkmark"></span>
+                                Analyze post comments (if available)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Options -->
+                <div class="analysis-options">
+                    <h4 class="options-title">
+                        <i class="fas fa-cog"></i>
+                        Analysis Options
+                    </h4>
+                    <div class="options-grid">
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="detailed_analysis" checked>
+                            <span class="checkmark"></span>
+                            <div class="option-info">
+                                <span class="option-name">Detailed Analysis</span>
+                                <span class="option-desc">Include preprocessing flags and confidence scores</span>
+                            </div>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="fact_check" checked>
+                            <span class="checkmark"></span>
+                            <div class="option-info">
+                                <span class="option-name">Fact Checking</span>
+                                <span class="option-desc">Cross-reference with Google Fact Check API</span>
+                            </div>
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="save_analysis" checked>
+                            <span class="checkmark"></span>
+                            <div class="option-info">
+                                <span class="option-name">Save Results</span>
+                                <span class="option-desc">Save analysis to your dashboard (requires login)</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-section">
+                    <button type="submit" class="btn btn-primary btn-large" id="analyzeButton">
+                        <i class="fas fa-search"></i>
+                        <span class="button-text">Analyze Content</span>
+                        <div class="button-spinner hidden">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                    <p class="submit-help">
+                        Analysis typically takes 5-15 seconds depending on content length
+                    </p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section hidden" id="resultsSection">
+        <div class="results-container">
+            <!-- Results Header -->
+            <div class="results-header">
+                <h2 class="results-title">
+                    <i class="fas fa-chart-line"></i>
+                    Analysis Results
+                </h2>
+                <div class="results-actions">
+                    <button class="btn btn-secondary" id="shareResults">
+                        <i class="fas fa-share"></i>
+                        Share
+                    </button>
+                    <button class="btn btn-secondary" id="exportResults">
+                        <i class="fas fa-download"></i>
+                        Export
+                    </button>
+                    <button class="btn btn-primary" id="analyzeAnother">
+                        <i class="fas fa-plus"></i>
+                        Analyze Another
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Results -->
+            <div class="results-grid">
+                <!-- Credibility Score -->
+                <div class="result-card main-score">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Overall Credibility
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="credibility-display">
+                            <div class="score-circle">
+                                <svg class="score-svg" viewBox="0 0 100 100">
+                                    <circle class="score-bg" cx="50" cy="50" r="45"></circle>
+                                    <circle class="score-fill" cx="50" cy="50" r="45" id="scoreCircle"></circle>
+                                </svg>
+                                <div class="score-text">
+                                    <span class="score-number" id="scoreNumber">-</span>
+                                    <span class="score-max">/10</span>
+                                </div>
+                            </div>
+                            <div class="score-info">
+                                <div class="verdict" id="verdict">-</div>
+                                <div class="confidence" id="confidence">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ML Prediction -->
+                <div class="result-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-robot"></i>
+                            AI Analysis
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="prediction-result" id="mlPrediction">
+                            <div class="prediction-item">
+                                <span class="prediction-label">Prediction:</span>
+                                <span class="prediction-value" id="mlVerdict">-</span>
+                            </div>
+                            <div class="prediction-item">
+                                <span class="prediction-label">Confidence:</span>
+                                <span class="prediction-value" id="mlConfidence">-</span>
+                            </div>
+                            <div class="model-breakdown" id="modelBreakdown">
+                                <!-- Model predictions will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fact Check Results -->
+                <div class="result-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-search"></i>
+                            Fact Check
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="fact-check-result" id="factCheckResult">
+                            <!-- Fact check results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Poser Detection (for Facebook posts) -->
+                <div class="result-card hidden" id="poserDetectionCard">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-user-secret"></i>
+                            Poser Detection
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="poser-result" id="poserResult">
+                            <!-- Poser detection results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preprocessing Flags -->
+                <div class="result-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-flag"></i>
+                            Content Analysis
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="flags-result" id="flagsResult">
+                            <!-- Preprocessing flags will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Source Credibility -->
+                <div class="result-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-globe"></i>
+                            Source Analysis
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="source-result" id="sourceResult">
+                            <!-- Source credibility will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Explanation -->
+            <div class="explanation-section">
+                <div class="explanation-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle"></i>
+                            Detailed Explanation
+                        </h3>
+                        <button class="toggle-button" id="toggleExplanation">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="card-content" id="explanationContent">
+                        <!-- Detailed explanation will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Error Section -->
+    <section class="error-section hidden" id="errorSection">
+        <div class="error-container">
+            <div class="error-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3 class="error-title">Analysis Failed</h3>
+                <p class="error-message" id="errorMessage">-</p>
+                <button class="btn btn-primary" id="retryAnalysis">
+                    <i class="fas fa-redo"></i>
+                    Try Again
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Tips -->
+    <section class="tips-section">
+        <div class="tips-container">
+            <h3 class="tips-title">
+                <i class="fas fa-lightbulb"></i>
+                Tips for Better Analysis
+            </h3>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <i class="fas fa-text-width"></i>
+                    <h4>Content Length</h4>
+                    <p>Provide at least 50 characters for accurate analysis. Longer content yields better results.</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-language"></i>
+                    <h4>Language Support</h4>
+                    <p>Our system works best with English and Filipino content, including local slang detection.</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-link"></i>
+                    <h4>URL Analysis</h4>
+                    <p>For URLs, we extract and analyze the main content while considering source credibility.</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fab fa-facebook"></i>
+                    <h4>Facebook Posts</h4>
+                    <p>Facebook analysis includes poser detection and account behavior analysis for comprehensive results.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/analyze.js') }}"></script>
+{% endblock %}

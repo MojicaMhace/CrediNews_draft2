@@ -1,0 +1,538 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard - CrediNews{% endblock %}
+
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/user_dashboard.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="user-dashboard-container">
+    <!-- Header Section -->
+    <section class="dashboard-header">
+        <div class="header-content">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="{{ current_user.photo_url or url_for('static', filename='images/default-avatar.png') }}" 
+                         alt="User Avatar" class="avatar-image">
+                    <div class="avatar-status online"></div>
+                </div>
+                <div class="user-details">
+                    <h1 class="user-name">{{ current_user.display_name or current_user.email.split('@')[0] }}</h1>
+                    <p class="user-email">{{ current_user.email }}</p>
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">{{ user_stats.total_news_verifications or '0' }}</span>
+                <span class="stat-label">News Verifications</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ user_stats.accuracy_rate or '0' }}%</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ user_stats.days_active or '0' }}</span>
+                            <span class="stat-label">Days Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="editProfile">
+                    <i class="fas fa-edit"></i>
+                    Edit Profile
+                </button>
+                <a href="{{ url_for('analyze') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    New Analysis
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <section class="dashboard-nav">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="overview">
+                <i class="fas fa-chart-pie"></i>
+                Overview
+            </button>
+            <button class="nav-tab" data-tab="history">
+                <i class="fas fa-history"></i>
+                Analysis History
+            </button>
+            <button class="nav-tab" data-tab="insights">
+                <i class="fas fa-lightbulb"></i>
+                Insights
+            </button>
+            <button class="nav-tab" data-tab="settings">
+                <i class="fas fa-cog"></i>
+                Settings
+            </button>
+        </div>
+    </section>
+
+    <!-- Overview Tab -->
+    <section class="tab-content active" id="overview">
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user_stats.total_news_verifications or '0' }}</div>
+                <div class="stat-label">Total News Verifications</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +{{ user_stats.news_verifications_this_week or '0' }} this week
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user_stats.fake_detected or '0' }}</div>
+                    <div class="stat-label">Fake News Found</div>
+                    <div class="stat-change">
+                        <i class="fas fa-percentage"></i>
+                        {{ user_stats.fake_percentage or '0' }}% of total
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user_stats.verified_news or '0' }}</div>
+                    <div class="stat-label">Verified News</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-check"></i>
+                        {{ user_stats.verified_percentage or '0' }}% verified
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ user_stats.avg_score or '0.0' }}</div>
+                    <div class="stat-label">Avg Credibility</div>
+                    <div class="stat-change">
+                        <i class="fas fa-star"></i>
+                        Out of 10.0
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Activity
+                </h3>
+                <a href="#" class="view-all-link" data-tab-switch="history">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="activity-timeline">
+                {% if recent_news_verifications %}
+                {% for verification in recent_news_verifications[:5] %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <i class="fas fa-{% if verification.verdict == 'FAKE' %}exclamation-triangle{% elif verification.verdict == 'REAL' %}check-circle{% else %}question-circle{% endif %}"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <h4 class="timeline-title">{{ verification.input_type.title() }} Analysis</h4>
+                                <span class="timeline-time">{{ verification.created_at.strftime('%m/%d/%Y %H:%M') }}</span>
+                            </div>
+                            <p class="timeline-description">{{ verification.content[:100] }}...</p>
+                            <div class="timeline-result">
+                                <div class="result-badge verdict-{{ verification.verdict.lower() }}">
+                                    {{ verification.verdict }}
+                                </div>
+                                <div class="result-score">
+                                    Score: {{ verification.credibility_score }}/10
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-timeline">
+                        <i class="fas fa-search"></i>
+                        <h4>No news verifications yet</h4>
+                        <p>Start analyzing news content to see your activity here</p>
+                        <a href="{{ url_for('analyze') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Start Analysis
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Personal Insights -->
+        <div class="insights-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Your Analysis Trends
+                </h3>
+            </div>
+            
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="card-header">
+                        <h4 class="card-title">Weekly Activity</h4>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="weeklyActivityChart" width="300" height="150"></canvas>
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="card-header">
+                        <h4 class="card-title">Content Types</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="content-types">
+                            <div class="type-item">
+                                <div class="type-icon">
+                                    <i class="fas fa-file-text"></i>
+                                </div>
+                                <div class="type-info">
+                                    <span class="type-name">Text</span>
+                                    <span class="type-count">{{ content_stats.text or '0' }}</span>
+                                </div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div class="type-info">
+                                    <span class="type-name">URLs</span>
+                                    <span class="type-count">{{ content_stats.url or '0' }}</span>
+                                </div>
+                            </div>
+                            <div class="type-item">
+                                <div class="type-icon">
+                                    <i class="fab fa-facebook"></i>
+                                </div>
+                                <div class="type-info">
+                                    <span class="type-name">Facebook</span>
+                                    <span class="type-count">{{ content_stats.facebook or '0' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- History Tab -->
+    <section class="tab-content" id="history">
+        <div class="history-header">
+            <h3 class="section-title">
+                <i class="fas fa-history"></i>
+                Analysis History
+            </h3>
+            <div class="history-filters">
+                <select class="filter-select" id="typeFilter">
+                    <option value="all">All Types</option>
+                    <option value="text">Text</option>
+                    <option value="url">URL</option>
+                    <option value="facebook">Facebook</option>
+                </select>
+                <select class="filter-select" id="verdictFilter">
+                    <option value="all">All Results</option>
+                    <option value="REAL">Real News</option>
+                    <option value="FAKE">Fake News</option>
+                    <option value="UNCERTAIN">Uncertain</option>
+                </select>
+                <input type="text" class="filter-input" id="searchFilter" placeholder="Search content...">
+            </div>
+        </div>
+        
+        <div class="history-list" id="historyList">
+            {% if user_news_verifications %}
+                {% for verification in user_news_verifications %}
+                <div class="history-item" data-type="{{ verification.input_type }}" data-verdict="{{ verification.verdict }}">
+                    <div class="item-header">
+                        <div class="item-type">
+                            <i class="fas fa-{% if verification.input_type == 'url' %}link{% elif verification.input_type == 'facebook' %}facebook{% else %}file-text{% endif %}"></i>
+                            {{ verification.input_type.title() }}
+                        </div>
+                        <div class="item-date">{{ verification.created_at.strftime('%m/%d/%Y %H:%M') }}</div>
+                    </div>
+                    <div class="item-content">
+                        <p class="item-text">{{ verification.content[:200] }}...</p>
+                        <div class="item-results">
+                            <div class="result-verdict verdict-{{ verification.verdict.lower() }}">
+                                {{ verification.verdict }}
+                            </div>
+                            <div class="result-score">
+                                {{ verification.credibility_score }}/10
+                            </div>
+                            <div class="result-confidence">
+                                {{ verification.confidence }}% confidence
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="viewAnalysis('{{ verification.id }}')">
+                            <i class="fas fa-eye"></i>
+                            View Details
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="shareAnalysis('{{ verification.id }}')">
+                            <i class="fas fa-share"></i>
+                            Share
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteAnalysis('{{ verification.id }}')">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-history">
+                    <i class="fas fa-search"></i>
+                    <h4>No analysis history</h4>
+                    <p>Your analyzed content will appear here</p>
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Start First Analysis
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination" id="historyPagination">
+            <!-- Pagination will be populated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Insights Tab -->
+    <section class="tab-content" id="insights">
+        <div class="insights-header">
+            <h3 class="section-title">
+                <i class="fas fa-lightbulb"></i>
+                Personal Insights
+            </h3>
+            <p class="section-description">
+                Discover patterns in your news consumption and analysis behavior
+            </p>
+        </div>
+        
+        <div class="insights-dashboard">
+            <!-- Accuracy Trends -->
+            <div class="insight-card large">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        Your Accuracy Over Time
+                    </h4>
+                </div>
+                <div class="card-content">
+                    <canvas id="accuracyTrendChart" width="600" height="200"></canvas>
+                </div>
+            </div>
+            
+            <!-- Content Categories -->
+            <div class="insight-card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="fas fa-tags"></i>
+                        Most Analyzed Topics
+                    </h4>
+                </div>
+                <div class="card-content">
+                    <div class="topics-list">
+                        {% for topic in user_topics[:5] %}
+                        <div class="topic-item">
+                            <span class="topic-name">{{ topic.name }}</span>
+                            <span class="topic-count">{{ topic.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendations -->
+            <div class="insight-card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="fas fa-star"></i>
+                        Recommendations
+                    </h4>
+                </div>
+                <div class="card-content">
+                    <div class="recommendations-list">
+                        <div class="recommendation-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Great job maintaining high accuracy in your news verifications!</span>
+                        </div>
+                        <div class="recommendation-item">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Consider analyzing more diverse content types for better insights.</span>
+                        </div>
+                        <div class="recommendation-item">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Enable fact-checking for more comprehensive analysis.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings Tab -->
+    <section class="tab-content" id="settings">
+        <div class="settings-header">
+            <h3 class="section-title">
+                <i class="fas fa-cog"></i>
+                Account Settings
+            </h3>
+        </div>
+        
+        <div class="settings-sections">
+            <!-- Profile Settings -->
+            <div class="settings-section">
+                <h4 class="settings-title">
+                    <i class="fas fa-user"></i>
+                    Profile Information
+                </h4>
+                <form class="settings-form" id="profileForm">
+                    <div class="form-group">
+                        <label for="displayName" class="form-label">Display Name</label>
+                        <input type="text" id="displayName" class="form-input" 
+                               value="{{ current_user.display_name or '' }}" placeholder="Enter your display name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" class="form-input" 
+                               value="{{ current_user.email }}" readonly>
+                        <small class="form-help">Email cannot be changed</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Analysis Preferences -->
+            <div class="settings-section">
+                <h4 class="settings-title">
+                    <i class="fas fa-sliders-h"></i>
+                    Analysis Preferences
+                </h4>
+                <form class="settings-form" id="preferencesForm">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoFactCheck" checked>
+                            <span class="checkmark"></span>
+                            Enable automatic fact-checking
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="saveNewsVerifications" checked>
+                            <span class="checkmark"></span>
+                            Save analysis results to history
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="detailedReports">
+                            <span class="checkmark"></span>
+                            Include detailed explanations in reports
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="confidenceThreshold" class="form-label">Confidence Threshold</label>
+                        <input type="range" id="confidenceThreshold" class="form-range" 
+                               min="50" max="95" value="75">
+                        <div class="range-labels">
+                            <span>50%</span>
+                            <span id="thresholdValue">75%</span>
+                            <span>95%</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Preferences
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Privacy Settings -->
+            <div class="settings-section">
+                <h4 class="settings-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Privacy & Security
+                </h4>
+                <div class="privacy-options">
+                    <div class="privacy-item">
+                        <div class="privacy-info">
+                            <h5>Data Export</h5>
+                            <p>Download all your analysis data and history</p>
+                        </div>
+                        <button class="btn btn-secondary" id="exportData">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                    </div>
+                    <div class="privacy-item">
+                        <div class="privacy-info">
+                            <h5>Delete Account</h5>
+                            <p>Permanently delete your account and all associated data</p>
+                        </div>
+                        <button class="btn btn-danger" id="deleteAccount">
+                            <i class="fas fa-trash"></i>
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Analysis Detail Modal -->
+<div class="modal hidden" id="analysisModal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-chart-line"></i>
+                Analysis Details
+            </h3>
+            <button class="modal-close" id="closeAnalysisModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="analysisModalContent">
+            <!-- Analysis details will be populated here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/user_dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,648 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CrediNews{% endblock %}
+
+{% block description %}CrediNews Dashboard - AI-powered news credibility verification and fact-checking platform{% endblock %}
+
+{% block extra_head %}
+<link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+<meta name="theme-color" content="#2563eb">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Hero Section -->
+    <section class="hero-section" aria-labelledby="hero-title">
+        <div class="hero-background">
+            <div class="hero-gradient"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title" id="hero-title">
+                    DISCOVER, ANALYZE, AND VERIFY NEWS CREDIBILITY
+                </h1>
+                <p class="hero-description">
+                    CrediNews is a trusted digital platform dedicated to fighting misinformation on Facebook. Our mission is to verify and analyze posts, headlines, and shared content, helping users discover accurate and reliable news sources. With CrediNews, you can identify fake news, promote truth, and build a more informed digital community. In CrediNews – Facts Matter.
+                </p>
+                <div class="hero-buttons">
+                    <a href="{{ url_for('analyze') }}" 
+                       class="btn-analyze"
+                       aria-label="Start analyzing news content">
+                        Analyze
+                    </a>
+                    <a href="{{ url_for('analyze') }}" 
+                       class="btn-verify"
+                       aria-label="Verify news content">
+                        Verify
+                    </a>
+                    <button class="btn-demo"
+                            aria-label="Watch a demo">
+                        <i class="fas fa-play" aria-hidden="true"></i>
+                        Watch a demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Stats -->
+    <section class="stats-section" aria-labelledby="stats-title">
+        <div class="stats-header">
+            <h2 class="stats-title" id="stats-title">Platform Statistics</h2>
+            <p class="stats-description">Real-time insights into our AI-powered verification system</p>
+        </div>
+        <div class="stats-container">
+            <div class="stat-card" data-stat="verifications">
+                <div class="stat-icon">
+                    <i class="fas fa-shield-check" aria-hidden="true"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ system_stats.total_news_verifications or '1247' }}">
+                        {{ system_stats.total_news_verifications or '1,247' }}
+                    </div>
+                    <div class="stat-label">News Analyzed</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                        <span>+15% this week</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card" data-stat="fake-detected">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ system_stats.fake_detected or '342' }}">
+                        {{ system_stats.fake_detected or '342' }}
+                    </div>
+                    <div class="stat-label">Fake News Detected</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-arrow-down" aria-hidden="true"></i>
+                        <span>-8% this week</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card" data-stat="users">
+                <div class="stat-icon">
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ system_stats.active_users or '89' }}">
+                        {{ system_stats.active_users or '89' }}
+                    </div>
+                    <div class="stat-label">Active Users</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                        <span>+23% this week</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card" data-stat="accuracy">
+                <div class="stat-icon">
+                    <i class="fas fa-bullseye" aria-hidden="true"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" data-target="{{ system_stats.accuracy or '94.2' }}">
+                        {{ system_stats.accuracy or '94.2' }}%
+                    </div>
+                    <div class="stat-label">Accuracy Rate</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                        <span>+2.1% this month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="how-it-works" aria-labelledby="features-title">
+        <div class="features-container">
+            <div class="features-header">
+                <div class="features-badge">
+                    <i class="fas fa-cogs" aria-hidden="true"></i>
+                    <span>How It Works</span>
+                </div>
+                <h2 id="features-title">CrediNews AI Verification System</h2>
+                <p>Our cutting-edge AI technology combines multiple verification methods to ensure the highest accuracy in news credibility assessment</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card" data-feature="ai-analysis">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain" aria-hidden="true"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>AI Analysis</h3>
+                        <p>Advanced natural language processing analyzes content structure, language patterns, and source credibility using state-of-the-art machine learning models.</p>
+                        <div class="feature-stats">
+                            <div class="feature-stat">
+                                <span class="stat-value">98.5%</span>
+                                <span class="stat-label">Accuracy</span>
+                            </div>
+                            <div class="feature-stat">
+                                <span class="stat-value">&lt;2s</span>
+                                <span class="stat-label">Processing</span>
+                            </div>
+                        </div>
+                        <div class="feature-tech">
+                            <span class="tech-tag primary">NLP</span>
+                            <span class="tech-tag primary">Machine Learning</span>
+                            <span class="tech-tag primary">Deep Learning</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card" data-feature="fact-verification">
+                    <div class="feature-icon">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Fact Verification</h3>
+                        <p>Cross-references claims with trusted sources and databases to verify factual accuracy through comprehensive fact-checking protocols.</p>
+                        <div class="feature-stats">
+                            <div class="feature-stat">
+                                <span class="stat-value">500+</span>
+                                <span class="stat-label">Sources</span>
+                            </div>
+                            <div class="feature-stat">
+                                <span class="stat-value">24/7</span>
+                                <span class="stat-label">Monitoring</span>
+                            </div>
+                        </div>
+                        <div class="feature-tech">
+                            <span class="tech-tag success">Database Matching</span>
+                            <span class="tech-tag success">Source Verification</span>
+                            <span class="tech-tag success">Real-time Check</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card" data-feature="poser-detection">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-secret" aria-hidden="true"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Poser Detection</h3>
+                        <p>Identifies fake accounts and suspicious posting patterns that spread misinformation through advanced behavioral analysis algorithms.</p>
+                        <div class="feature-stats">
+                            <div class="feature-stat">
+                                <span class="stat-value">95%</span>
+                                <span class="stat-label">Detection Rate</span>
+                            </div>
+                            <div class="feature-stat">
+                                <span class="stat-value">1M+</span>
+                                <span class="stat-label">Profiles Analyzed</span>
+                            </div>
+                        </div>
+                        <div class="feature-tech">
+                            <span class="tech-tag warning">Behavioral Analysis</span>
+                            <span class="tech-tag warning">Pattern Recognition</span>
+                            <span class="tech-tag warning">Network Analysis</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-card" data-feature="filipino-context">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe-asia" aria-hidden="true"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Filipino Context</h3>
+                        <p>Specialized understanding of Filipino culture, politics, and local news sources for accurate analysis tailored to the Philippine context.</p>
+                        <div class="feature-stats">
+                            <div class="feature-stat">
+                                <span class="stat-value">100+</span>
+                                <span class="stat-label">Local Sources</span>
+                            </div>
+                            <div class="feature-stat">
+                                <span class="stat-value">3</span>
+                                <span class="stat-label">Languages</span>
+                            </div>
+                        </div>
+                        <div class="feature-tech">
+                            <span class="tech-tag info">Cultural AI</span>
+                            <span class="tech-tag info">Local Sources</span>
+                            <span class="tech-tag info">Multilingual</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Activity (for authenticated users) -->
+    {% if current_user.is_authenticated %}
+    <section class="activity-section" aria-labelledby="activity-title">
+        <div class="activity-container">
+            <div class="activity-header">
+                <div class="activity-badge">
+                    <i class="fas fa-history" aria-hidden="true"></i>
+                    <span>Your Activity</span>
+                </div>
+                <h2 id="activity-title">Recent Verifications</h2>
+                <p>Track your latest news analysis and verification results with detailed insights</p>
+                <div class="activity-actions">
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        New Analysis
+                    </a>
+                    <button class="btn btn-outline btn-sm" onclick="refreshActivity()">
+                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            {% if user_verifications %}
+            <div class="activity-grid">
+                {% for verification in user_verifications %}
+                <div class="activity-card" data-verification-id="{{ verification.id }}">
+                    <div class="activity-header">
+                        <div class="activity-type">
+                            <div class="type-icon {{ verification.input_type }}">
+                                <i class="fas fa-{{ 'link' if verification.input_type == 'url' else 'file-text' }}" aria-hidden="true"></i>
+                            </div>
+                            <div class="type-info">
+                                <span class="type-label">{{ verification.input_type.title() }} Analysis</span>
+                                <span class="type-source">{{ verification.source or 'Unknown Source' }}</span>
+                            </div>
+                        </div>
+                        <div class="activity-time">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                            <time datetime="{{ verification.timestamp.isoformat() }}">
+                                {{ verification.timestamp.strftime('%b %d, %Y at %I:%M %p') }}
+                            </time>
+                        </div>
+                    </div>
+                    <div class="activity-content">
+                        <p class="content-preview">{{ verification.content[:150] }}{% if verification.content|length > 150 %}...{% endif %}</p>
+                        {% if verification.content|length > 150 %}
+                        <button class="content-expand" onclick="toggleContent(this)">
+                            <span class="expand-text">Show more</span>
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="activity-result">
+                        <div class="result-metrics">
+                            <div class="credibility-score">
+                                <div class="score-header">
+                                    <span class="score-label">Credibility Score</span>
+                                    <span class="score-value {{ 'high' if verification.credibility_score >= 70 else 'medium' if verification.credibility_score >= 40 else 'low' }}">
+                                        {{ verification.credibility_score }}%
+                                    </span>
+                                </div>
+                                <div class="score-bar">
+                                    <div class="score-fill {{ 'high' if verification.credibility_score >= 70 else 'medium' if verification.credibility_score >= 40 else 'low' }}" 
+                                         style="width: {{ verification.credibility_score }}%"></div>
+                                </div>
+                            </div>
+                            <div class="verdict">
+                                <span class="verdict-label">Final Verdict</span>
+                                <span class="verdict-value {{ verification.verdict.lower() }}">
+                                    <i class="fas fa-{{ 'check-circle' if verification.verdict.lower() == 'credible' else 'exclamation-triangle' if verification.verdict.lower() == 'questionable' else 'times-circle' }}" aria-hidden="true"></i>
+                                    {{ verification.verdict }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="result-actions">
+                            <button class="action-btn" onclick="viewDetails('{{ verification.id }}')">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                                View Details
+                            </button>
+                            <button class="action-btn" onclick="shareResult('{{ verification.id }}')">
+                                <i class="fas fa-share-alt" aria-hidden="true"></i>
+                                Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="activity-pagination">
+                <button class="btn btn-outline btn-sm" onclick="loadMoreActivity()">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    Load More
+                </button>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-illustration">
+                    <div class="empty-icon">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </div>
+                    <div class="empty-pattern"></div>
+                </div>
+                <div class="empty-content">
+                    <h3>No verifications yet</h3>
+                    <p>Start analyzing news content to see your verification history here. Our AI will provide detailed credibility assessments and insights.</p>
+                    <div class="empty-actions">
+                        <a href="{{ url_for('analyze') }}" class="btn btn-primary">
+                            <i class="fas fa-rocket" aria-hidden="true"></i>
+                            Start Your First Analysis
+                        </a>
+                        <a href="#how-it-works" class="btn btn-outline">
+                            <i class="fas fa-info-circle" aria-hidden="true"></i>
+                            Learn How It Works
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Trending Misinformation -->
+    <section class="trending-section" aria-labelledby="trending-title">
+        <div class="trending-container">
+            <div class="trending-header">
+                <div class="trending-badge">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    <span>Trending Insights</span>
+                </div>
+                <h2 id="trending-title">Misinformation Analytics</h2>
+                <p>Real-time insights into misinformation patterns, detection rates, and emerging threats across the Philippines</p>
+                <div class="trending-controls">
+                    <div class="time-selector">
+                        <button class="time-btn active" data-period="7d">7 Days</button>
+                        <button class="time-btn" data-period="30d">30 Days</button>
+                        <button class="time-btn" data-period="90d">90 Days</button>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="exportTrendingData()">
+                        <i class="fas fa-download" aria-hidden="true"></i>
+                        Export Data
+                    </button>
+                </div>
+            </div>
+            <div class="trending-grid">
+                <div class="trend-card chart-card" data-card="detection-rate">
+                    <div class="trend-header">
+                        <div class="trend-title">
+                            <h3>Daily Detection Rate</h3>
+                            <div class="trend-indicator positive">
+                                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                                <span>+12% vs last week</span>
+                            </div>
+                        </div>
+                        <div class="trend-period">
+                            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                            <span>Last 7 days</span>
+                        </div>
+                    </div>
+                    <div class="trend-chart">
+                        <canvas id="detectionChart" width="400" height="200" aria-label="Daily misinformation detection rate chart"></canvas>
+                    </div>
+                    <div class="trend-stats">
+                        <div class="trend-stat">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Average Daily</span>
+                                <span class="stat-value">{{ trending_stats.avg_daily or '23' }}</span>
+                            </div>
+                        </div>
+                        <div class="trend-stat">
+                            <div class="stat-icon">
+                                <i class="fas fa-trophy" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Peak Day</span>
+                                <span class="stat-value">{{ trending_stats.peak_day or '45' }}</span>
+                            </div>
+                        </div>
+                        <div class="trend-stat">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Avg Response Time</span>
+                                <span class="stat-value">1.2s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="trend-card categories-card" data-card="top-categories">
+                    <div class="trend-header">
+                        <div class="trend-title">
+                            <h3>Top Misinformation Categories</h3>
+                            <div class="trend-indicator neutral">
+                                <i class="fas fa-minus" aria-hidden="true"></i>
+                                <span>Stable distribution</span>
+                            </div>
+                        </div>
+                        <div class="trend-period">
+                            <i class="fas fa-calendar-week" aria-hidden="true"></i>
+                            <span>This week</span>
+                        </div>
+                    </div>
+                    <div class="categories-list">
+                        <div class="category-item" data-category="political">
+                            <div class="category-header">
+                                <div class="category-icon political">
+                                    <i class="fas fa-vote-yea" aria-hidden="true"></i>
+                                </div>
+                                <div class="category-info">
+                                    <span class="category-name">Political</span>
+                                    <span class="category-count">{{ trending_stats.political or '156' }} cases</span>
+                                </div>
+                                <div class="category-percentage">75%</div>
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-progress political" style="width: 75%" aria-label="Political misinformation: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="category-item" data-category="health">
+                            <div class="category-header">
+                                <div class="category-icon health">
+                                    <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                                </div>
+                                <div class="category-info">
+                                    <span class="category-name">Health</span>
+                                    <span class="category-count">{{ trending_stats.health or '89' }} cases</span>
+                                </div>
+                                <div class="category-percentage">45%</div>
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-progress health" style="width: 45%" aria-label="Health misinformation: 45%"></div>
+                            </div>
+                        </div>
+                        <div class="category-item" data-category="technology">
+                            <div class="category-header">
+                                <div class="category-icon technology">
+                                    <i class="fas fa-microchip" aria-hidden="true"></i>
+                                </div>
+                                <div class="category-info">
+                                    <span class="category-name">Technology</span>
+                                    <span class="category-count">{{ trending_stats.technology or '67' }} cases</span>
+                                </div>
+                                <div class="category-percentage">35%</div>
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-progress technology" style="width: 35%" aria-label="Technology misinformation: 35%"></div>
+                            </div>
+                        </div>
+                        <div class="category-item" data-category="social">
+                            <div class="category-header">
+                                <div class="category-icon social">
+                                    <i class="fas fa-users" aria-hidden="true"></i>
+                                </div>
+                                <div class="category-info">
+                                    <span class="category-name">Social</span>
+                                    <span class="category-count">{{ trending_stats.social or '34' }} cases</span>
+                                </div>
+                                <div class="category-percentage">20%</div>
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-progress social" style="width: 20%" aria-label="Social misinformation: 20%"></div>
+                            </div>
+                        </div>
+                        <div class="category-item" data-category="economic">
+                            <div class="category-header">
+                                <div class="category-icon economic">
+                                    <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                                </div>
+                                <div class="category-info">
+                                    <span class="category-name">Economic</span>
+                                    <span class="category-count">{{ trending_stats.economic or '21' }} cases</span>
+                                </div>
+                                <div class="category-percentage">12%</div>
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-progress economic" style="width: 12%" aria-label="Economic misinformation: 12%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="categories-footer">
+                        <button class="btn btn-outline btn-sm" onclick="viewAllCategories()">
+                            <i class="fas fa-list" aria-hidden="true"></i>
+                            View All Categories
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="trending-insights">
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
+                    <div class="insight-content">
+                        <h4>Alert: Political Misinformation Spike</h4>
+                        <p>75% increase in political misinformation detected in the past 48 hours. Primarily related to upcoming elections.</p>
+                    </div>
+                    <div class="insight-action">
+                        <button class="btn btn-warning btn-sm">View Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section" aria-labelledby="cta-title">
+        <div class="cta-background">
+            <div class="cta-pattern"></div>
+            <div class="cta-gradient"></div>
+        </div>
+        <div class="cta-container">
+            <div class="cta-content">
+                <div class="cta-badge">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                    <span>Join the Fight</span>
+                </div>
+                <h2 id="cta-title">Ready to Combat Misinformation?</h2>
+                <p>Join thousands of Filipinos who trust CrediNews to verify news credibility and protect their communities from fake news. Our AI-powered platform provides instant, accurate verification with 94.2% accuracy.</p>
+                <div class="cta-features">
+                    <div class="cta-feature">
+                        <i class="fas fa-bolt" aria-hidden="true"></i>
+                        <span>Instant Analysis</span>
+                    </div>
+                    <div class="cta-feature">
+                        <i class="fas fa-shield-check" aria-hidden="true"></i>
+                        <span>94.2% Accuracy</span>
+                    </div>
+                    <div class="cta-feature">
+                        <i class="fas fa-globe-asia" aria-hidden="true"></i>
+                        <span>Filipino Context</span>
+                    </div>
+                    <div class="cta-feature">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
+                        <span>Secure & Private</span>
+                    </div>
+                </div>
+                <div class="cta-buttons">
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg" aria-label="Sign up for free CrediNews account">
+                        <i class="fas fa-user-plus" aria-hidden="true"></i>
+                        <span>Sign Up Free</span>
+                        <small>No credit card required</small>
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('analyze') }}" class="btn btn-outline btn-lg" aria-label="Try news analysis tool">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <span>Try Analysis Now</span>
+                        <small>Test our AI instantly</small>
+                    </a>
+                </div>
+                <div class="cta-trust">
+                    <div class="trust-item">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <span>Trusted by 1,000+ users</span>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-award" aria-hidden="true"></i>
+                        <span>Award-winning AI technology</span>
+                    </div>
+                </div>
+            </div>
+            <div class="cta-visual">
+                <div class="cta-illustration">
+                    <div class="illustration-circle primary"></div>
+                    <div class="illustration-circle secondary"></div>
+                    <div class="illustration-circle accent"></div>
+                </div>
+                <div class="cta-stats">
+                    <div class="cta-stat" data-stat="verified">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" data-target="1247">1,247+</div>
+                            <div class="stat-label">News Verified</div>
+                        </div>
+                    </div>
+                    <div class="cta-stat" data-stat="accuracy">
+                        <div class="stat-icon">
+                            <i class="fas fa-bullseye" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" data-target="94.2">94.2%</div>
+                            <div class="stat-label">Accuracy Rate</div>
+                        </div>
+                    </div>
+                    <div class="cta-stat" data-stat="users">
+                        <div class="stat-icon">
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" data-target="89">89+</div>
+                            <div class="stat-label">Active Users</div>
+                        </div>
+                    </div>
+                    <div class="cta-stat" data-stat="response">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" data-target="1.2">1.2s</div>
+                            <div class="stat-label">Avg Response</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

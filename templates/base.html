@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="{% block description %}CrediNews - Advanced AI-powered news credibility verification and fact-checking platform{% endblock %}">
+    <meta name="keywords" content="news verification, fact checking, AI, misinformation detection, credibility analysis">
+    <meta name="author" content="CrediNews">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="{% block og_title %}CrediNews - News Credibility Checker{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Advanced AI-powered news credibility verification and fact-checking platform{% endblock %}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og-image.png', _external=True) }}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="{% block twitter_title %}CrediNews - News Credibility Checker{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Advanced AI-powered news credibility verification and fact-checking platform{% endblock %}">
+    <meta property="twitter:image" content="{{ url_for('static', filename='images/og-image.png', _external=True) }}">
+    
+    <title>{% block title %}CrediNews - News Credibility Checker{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- CSS -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="msapplication-TileColor" content="#2563eb">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="dark-theme" id="app-body">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <!-- Logo/Brand -->
+            <div class="navbar-brand">
+                <a href="{{ url_for('index') }}" class="brand-link" aria-label="CrediNews Home">
+                    <i class="fas fa-shield-alt brand-icon" aria-hidden="true"></i>
+                    <span class="logo-text">CREDINEWS</span>
+                </a>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="nav-links" role="menubar">
+                <a href="{{ url_for('analyze') }}" 
+                   class="nav-link {% if request.endpoint == 'analyze' %}active{% endif %}"
+                   role="menuitem"
+                   aria-current="{% if request.endpoint == 'analyze' %}page{% endif %}">
+                    <span>Submit News</span>
+                </a>
+                <a href="{{ url_for('analyze') }}" 
+                   class="nav-link {% if request.endpoint == 'analyze' %}active{% endif %}"
+                   role="menuitem"
+                   aria-current="{% if request.endpoint == 'analyze' %}page{% endif %}">
+                    <span>Verify News</span>
+                </a>
+                <a href="#about" 
+                   class="nav-link"
+                   role="menuitem">
+                    <span>About</span>
+                </a>
+            </div>
+            
+            <!-- Right Side Controls -->
+            <div class="nav-controls">
+                <!-- Search Bar -->
+                <div class="nav-search">
+                    <input type="text" 
+                           class="search-input" 
+                           placeholder="Search"
+                           aria-label="Search news">
+                    <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                </div>
+                
+                <!-- Verify Button -->
+                <a href="{{ url_for('analyze') }}" class="verify-btn">
+                    Verify
+                </a>
+                
+                <!-- Theme Toggle -->
+                <button class="theme-toggle" 
+                        id="themeToggle" 
+                        aria-label="Toggle dark/light theme"
+                        title="Toggle theme">
+                    <i class="fas fa-moon" id="themeIcon" aria-hidden="true"></i>
+                    <span class="sr-only">Toggle theme</span>
+                </button>
+                
+                <!-- User Menu -->
+                <div class="user-menu">
+                    {% if current_user.is_authenticated %}
+                        <div class="user-dropdown">
+                            <button class="user-button" 
+                                    id="userMenuButton"
+                                    aria-expanded="false"
+                                    aria-haspopup="true"
+                                    aria-label="User menu">
+                                <img src="{{ current_user.photo_url or url_for('static', filename='images/default-avatar.png') }}" 
+                                     alt="Avatar for {{ current_user.display_name or current_user.email.split('@')[0] }}" 
+                                     class="user-avatar"
+                                     loading="lazy">
+                                <span class="user-name">{{ current_user.display_name or current_user.email.split('@')[0] }}</span>
+                                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                            </button>
+                            <div class="dropdown-menu" 
+                                 id="userDropdown"
+                                 role="menu"
+                                 aria-labelledby="userMenuButton">
+                                <a href="{{ url_for('user_dashboard') }}" 
+                                   class="dropdown-item"
+                                   role="menuitem">
+                                    <i class="fas fa-user" aria-hidden="true"></i>
+                                    Profile
+                                </a>
+                                <a href="{{ url_for('user_dashboard') }}#settings" 
+                                   class="dropdown-item"
+                                   role="menuitem">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                    Settings
+                                </a>
+                                <div class="dropdown-divider" role="separator"></div>
+                                <a href="{{ url_for('logout') }}" 
+                                   class="dropdown-item"
+                                   role="menuitem">
+                                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" 
+                           class="login-button"
+                           aria-label="Sign in with Google">
+                            <i class="fab fa-google" aria-hidden="true"></i>
+                            <span>Sign In</span>
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" 
+                        id="mobileMenuToggle"
+                        aria-expanded="false"
+                        aria-controls="mobileNav"
+                        aria-label="Toggle mobile menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="sr-only">Menu</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav" id="mobileNav">
+            <a href="{{ url_for('user_dashboard') }}" class="mobile-nav-link">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="{{ url_for('analyze') }}" class="mobile-nav-link">
+                <i class="fas fa-search"></i>
+                Analyze
+            </a>
+            <a href="{{ url_for('trends') }}" class="mobile-nav-link">
+                <i class="fas fa-chart-line"></i>
+                Trends
+            </a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('user_dashboard') }}" class="mobile-nav-link">
+                <i class="fas fa-user"></i>
+                Profile
+            </a>
+            <a href="{{ url_for('logout') }}" class="mobile-nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="mobile-nav-link">
+                <i class="fab fa-google"></i>
+                Sign In
+            </a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}" data-auto-dismiss="true">
+                        <div class="flash-content">
+                            <i class="fas fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button class="flash-close" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    
+    <!-- Main Content -->
+    <main class="main-content" id="main-content" role="main">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-section footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                    <h3>CrediNews</h3>
+                </div>
+                <p>Advanced AI-powered news credibility verification and fact-checking platform. Combating misinformation with cutting-edge technology.</p>
+                <div class="social-links" aria-label="Social media links">
+                    <a href="#" 
+                       title="Follow us on Facebook" 
+                       aria-label="Facebook"
+                       rel="noopener noreferrer"
+                       target="_blank">
+                        <i class="fab fa-facebook" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" 
+                       title="Follow us on Twitter" 
+                       aria-label="Twitter"
+                       rel="noopener noreferrer"
+                       target="_blank">
+                        <i class="fab fa-twitter" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" 
+                       title="Connect on LinkedIn" 
+                       aria-label="LinkedIn"
+                       rel="noopener noreferrer"
+                       target="_blank">
+                        <i class="fab fa-linkedin" aria-hidden="true"></i>
+                    </a>
+                    <a href="#" 
+                       title="Subscribe to our YouTube channel" 
+                       aria-label="YouTube"
+                       rel="noopener noreferrer"
+                       target="_blank">
+                        <i class="fab fa-youtube" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Features</h4>
+                <ul role="list">
+                    <li><a href="{{ url_for('analyze') }}">News Analysis</a></li>
+                    <li><a href="{{ url_for('trends') }}">Misinformation Trends</a></li>
+                    <li><a href="#" aria-label="Fact Checking (Coming Soon)">Fact Checking</a></li>
+                    <li><a href="#" aria-label="Deepfake Detection (Coming Soon)">Deepfake Detection</a></li>
+                    <li><a href="#" aria-label="Source Verification (Coming Soon)">Source Verification</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul role="list">
+                    <li><a href="#" aria-label="How It Works (Coming Soon)">How It Works</a></li>
+                    <li><a href="#" aria-label="API Documentation (Coming Soon)">API Documentation</a></li>
+                    <li><a href="#" aria-label="Research Papers (Coming Soon)">Research Papers</a></li>
+                    <li><a href="#" aria-label="Privacy Policy (Coming Soon)">Privacy Policy</a></li>
+                    <li><a href="#" aria-label="Terms of Service (Coming Soon)">Terms of Service</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul role="list">
+                    <li><a href="mailto:support@credinews.com" aria-label="Email support">support@credinews.com</a></li>
+                    <li><a href="#" aria-label="Help Center (Coming Soon)">Help Center</a></li>
+                    <li><a href="#" aria-label="Report Issue (Coming Soon)">Report Issue</a></li>
+                    <li><a href="#" aria-label="Community Forum (Coming Soon)">Community Forum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <p>&copy; 2024 CrediNews. All rights reserved.</p>
+                <p class="footer-tech">Powered by AI, Google Fact Check Tools, and Firebase</p>
+            </div>
+            <div class="footer-badges">
+                <span class="badge">AI-Powered</span>
+                <span class="badge">Real-time</span>
+                <span class="badge">Secure</span>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing content...</p>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "{{ config.FIREBASE_API_KEY }}",
+            authDomain: "{{ config.FIREBASE_AUTH_DOMAIN }}",
+            projectId: "{{ config.FIREBASE_PROJECT_ID }}",
+            storageBucket: "{{ config.FIREBASE_STORAGE_BUCKET }}",
+            messagingSenderId: "{{ config.FIREBASE_MESSAGING_SENDER_ID }}",
+            appId: "{{ config.FIREBASE_APP_ID }}"
+        };
+        
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,45 @@
+# Core Flask dependencies
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-Login==0.6.3
+Flask-Session==0.5.0
+
+# Machine Learning
+scikit-learn==1.3.0
+numpy==1.24.3
+pandas==2.0.3
+nltk==3.8.1
+textblob==0.17.1
+
+# Text Processing
+newspaper3k==0.2.8
+requests>=2.19.1,<2.30
+beautifulsoup4==4.12.2
+
+# Firebase
+firebase-admin==6.2.0
+pyrebase4==4.7.1
+
+# Google APIs
+google-auth==2.22.0
+google-auth-oauthlib==1.0.0
+google-auth-httplib2==0.1.0
+google-api-python-client==2.97.0
+
+# Facebook Graph API
+facebook-sdk==3.1.0
+
+# Data Visualization
+plotly==5.15.0
+matplotlib==3.7.2
+seaborn==0.12.2
+
+# Utilities
+python-dotenv==1.0.0
+werkzeug==2.3.7
+markupsafe==2.1.3
+jinja2==3.1.2
+
+# Development
+flake8==6.0.0
+pytest==7.4.0

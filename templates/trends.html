@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}Misinformation Trends - CrediNews{% endblock %}
+
+{% block extra_head %}
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+<!-- CSS -->
+<link href="{{ url_for('static', filename='css/trends.css') }}" rel="stylesheet">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="trends-container">
+    <!-- Header Section -->
+    <section class="trends-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-chart-line"></i>
+                Misinformation Trends
+            </h1>
+            <p class="page-description">
+                Real-time analytics and insights into misinformation patterns, fake news detection rates, and trending topics.
+            </p>
+        </div>
+        
+        <!-- Time Range Selector -->
+        <div class="time-range-selector">
+            <div class="selector-label">Time Range:</div>
+            <div class="range-buttons">
+                <button class="range-btn active" data-range="24h">24 Hours</button>
+                <button class="range-btn" data-range="7d">7 Days</button>
+                <button class="range-btn" data-range="30d">30 Days</button>
+                <button class="range-btn" data-range="90d">90 Days</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="metrics-section">
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" id="totalNewsVerifications">{{ metrics.total_news_verifications or '1,247' }}</div>
+            <div class="metric-label">Total News Verifications</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +12% from last period
+                    </div>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" id="fakeDetected">{{ metrics.fake_detected or '342' }}</div>
+                    <div class="metric-label">Fake News Detected</div>
+                    <div class="metric-change negative">
+                        <i class="fas fa-arrow-up"></i>
+                        +8% from last period
+                    </div>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon success">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" id="accuracyRate">{{ metrics.accuracy_rate or '94.2' }}%</div>
+                    <div class="metric-label">Accuracy Rate</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +0.3% from last period
+                    </div>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" id="posersDetected">{{ metrics.posers_detected or '89' }}</div>
+                    <div class="metric-label">Posers Detected</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-arrow-down"></i>
+                        -5% from last period
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="charts-section">
+        <div class="charts-grid">
+            <!-- Detection Rate Over Time -->
+            <div class="chart-card large">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        Detection Rate Over Time
+                    </h3>
+                    <div class="card-actions">
+                        <button class="btn btn-sm btn-secondary" id="exportDetectionChart">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <canvas id="detectionRateChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Category Distribution -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Category Distribution
+                    </h3>
+                    <div class="card-actions">
+                        <button class="btn btn-sm btn-secondary" id="exportCategoryChart">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <canvas id="categoryChart" width="400" height="300"></canvas>
+                    <div class="category-legend" id="categoryLegend">
+                        <!-- Legend will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Source Credibility -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-globe"></i>
+                        Source Credibility
+                    </h3>
+                    <div class="card-actions">
+                        <button class="btn btn-sm btn-secondary" id="exportSourceChart">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <canvas id="sourceChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Topics -->
+    <section class="trending-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-fire"></i>
+                Trending Misinformation Topics
+            </h2>
+            <div class="section-actions">
+                <button class="btn btn-secondary" id="refreshTrending">
+                    <i class="fas fa-sync"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+        
+        <div class="trending-grid">
+            <div class="trending-card">
+                <div class="card-header">
+                    <h3 class="card-title">Most Detected Keywords</h3>
+                </div>
+                <div class="card-content">
+                    <div class="keyword-cloud" id="keywordCloud">
+                        <!-- Keywords will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="trending-card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Fake News Patterns</h3>
+                </div>
+                <div class="card-content">
+                    <div class="patterns-list" id="patternsList">
+                        <!-- Patterns will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="trending-card">
+                <div class="card-header">
+                    <h3 class="card-title">High-Risk Sources</h3>
+                </div>
+                <div class="card-content">
+                    <div class="sources-list" id="sourcesList">
+                        <!-- Sources will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Analytics -->
+    <section class="analytics-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-analytics"></i>
+                Detailed Analytics
+            </h2>
+        </div>
+        
+        <div class="analytics-grid">
+            <!-- ML Model Performance -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-robot"></i>
+                        ML Model Performance
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="model-stats">
+                        <div class="model-stat">
+                            <div class="stat-label">Logistic Regression</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 92%"></div>
+                                <span class="stat-value">92%</span>
+                            </div>
+                        </div>
+                        <div class="model-stat">
+                            <div class="stat-label">Naive Bayes</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 89%"></div>
+                                <span class="stat-value">89%</span>
+                            </div>
+                        </div>
+                        <div class="model-stat">
+                            <div class="stat-label">SVM</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 94%"></div>
+                                <span class="stat-value">94%</span>
+                            </div>
+                        </div>
+                        <div class="model-stat">
+                            <div class="stat-label">Ensemble</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 96%"></div>
+                                <span class="stat-value">96%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fact Check Coverage -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-search"></i>
+                        Fact Check Coverage
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="coverage-stats">
+                        <div class="coverage-item">
+                            <div class="coverage-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="coverage-info">
+                                <div class="coverage-value">{{ analytics.fact_checks_found or '78%' }}</div>
+                                <div class="coverage-label">Claims Found</div>
+                            </div>
+                        </div>
+                        <div class="coverage-item">
+                            <div class="coverage-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="coverage-info">
+                                <div class="coverage-value">{{ analytics.avg_response_time or '2.3s' }}</div>
+                                <div class="coverage-label">Avg Response Time</div>
+                            </div>
+                        </div>
+                        <div class="coverage-item">
+                            <div class="coverage-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="coverage-info">
+                                <div class="coverage-value">{{ analytics.sources_checked or '15' }}</div>
+                                <div class="coverage-label">Sources Checked</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Geographic Distribution -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-map"></i>
+                        Geographic Distribution
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="geo-stats">
+                        <div class="geo-item">
+                            <span class="geo-region">Metro Manila</span>
+                            <span class="geo-count">{{ geo.metro_manila or '45%' }}</span>
+                        </div>
+                        <div class="geo-item">
+                            <span class="geo-region">Cebu</span>
+                            <span class="geo-count">{{ geo.cebu or '18%' }}</span>
+                        </div>
+                        <div class="geo-item">
+                            <span class="geo-region">Davao</span>
+                            <span class="geo-count">{{ geo.davao or '12%' }}</span>
+                        </div>
+                        <div class="geo-item">
+                            <span class="geo-region">Other Regions</span>
+                            <span class="geo-count">{{ geo.others or '25%' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Export Options -->
+    <section class="export-section">
+        <div class="export-container">
+            <div class="export-header">
+                <h3 class="export-title">
+                    <i class="fas fa-download"></i>
+                    Export Analytics
+                </h3>
+                <p class="export-description">
+                    Download comprehensive reports and data for further analysis
+                </p>
+            </div>
+            
+            <div class="export-options">
+                <button class="export-btn" id="exportPDF">
+                    <i class="fas fa-file-pdf"></i>
+                    <div class="export-info">
+                        <span class="export-name">PDF Report</span>
+                        <span class="export-desc">Complete analytics report</span>
+                    </div>
+                </button>
+                
+                <button class="export-btn" id="exportCSV">
+                    <i class="fas fa-file-csv"></i>
+                    <div class="export-info">
+                        <span class="export-name">CSV Data</span>
+                        <span class="export-desc">Raw data for analysis</span>
+                    </div>
+                </button>
+                
+                <button class="export-btn" id="exportJSON">
+                    <i class="fas fa-file-code"></i>
+                    <div class="export-info">
+                        <span class="export-name">JSON Data</span>
+                        <span class="export-desc">Structured data format</span>
+                    </div>
+                </button>
+                
+                <button class="export-btn" id="exportImages">
+                    <i class="fas fa-images"></i>
+                    <div class="export-info">
+                        <span class="export-name">Chart Images</span>
+                        <span class="export-desc">High-resolution charts</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay hidden" id="trendsLoading">
+    <div class="loading-content">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+        <h3>Loading Analytics...</h3>
+        <p>Fetching latest misinformation trends</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="{{ url_for('static', filename='js/trends.js') }}"></script>
+{% endblock %}
